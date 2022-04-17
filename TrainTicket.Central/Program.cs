@@ -53,6 +53,7 @@ builder.Services.AddSingleton(provider =>
     return new ProjectionManager(eventStoreClient!, checkpointStore!, new IProjection[]
     {
         new ConsoleProjection(),
+        new StationDetailsProjection(mongoConfiguration),
         new KafkaProjection(producerConfig)
     }, logger!);
 });
