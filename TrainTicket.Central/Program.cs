@@ -1,3 +1,4 @@
+using System.Reflection;
 using Confluent.Kafka;
 using EventStore.Client;
 using Microsoft.OpenApi.Models;
@@ -15,7 +16,12 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Train station management API", Version = "v1" }));
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Train station management API", Version = "v1" });
+    // using System.Reflection to load swagger documentation from code documentation
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var eventStoreConfiguration = new EventStoreConfiguration();
 builder.Configuration.Bind("EventStoreConfiguration", eventStoreConfiguration);
@@ -31,6 +37,7 @@ builder.Services.AddSingleton(kafkaConfiguration);
 builder.Services.AddSingleton<IAggregateStore, EsAggregateStore>();
 builder.Services.AddScoped<StationService>();
 builder.Services.AddSingleton<ICheckpointStore, MongoDbCheckpointStore>();
+builder.Services.AddSingleton<StationQueryService>();
 
 // Add eventstore client
 builder.Services.AddSingleton(provider =>
